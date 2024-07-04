@@ -1,3 +1,5 @@
+use rgb::AsPixels;
+
 const WHITE: lodepng::RGBA = lodepng::RGBA::new(u8::MAX, u8::MAX, u8::MAX, u8::MAX);
 const BLANK: lodepng::RGBA = lodepng::RGBA::new(0, 0, 0, 0);
 
@@ -172,6 +174,14 @@ impl Catenary {
             disp_y,
             bounds,
         })
+    }
+
+    pub fn render_new_tex(&self) -> Vec<u8> {
+        let (w, h) = self.bounds;
+        let mut buf = vec![0_u8; w * h * 4];
+        let pixels: &mut [rgb::RGBA8] = buf.as_mut_slice().as_pixels_mut();
+        self.render_catenary(pixels, w, h);
+        buf
     }
 }
 

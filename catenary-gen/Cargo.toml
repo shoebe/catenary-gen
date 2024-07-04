@@ -7,6 +7,7 @@ edition = "2021"
 lodepng = { version = "3.10", default-features = false, features = [
     "rust_backend",
 ] }
+rgb = "0.8"
 bresenham-curves-circles-rs = { git = "https://github.com/shoebe/bresenham-curves-circles-rs" }
 tiny-skia = "0.11.4"
 anyhow = "1.0.86"

@@ -43,7 +43,16 @@ impl TemplateApp {
     }
 
     pub fn update_texture(&mut self, egui_ctx: &egui::Context) {
-        let cat = Catenary::new(self.x_dist, self.y_dist, self.arc_len).unwrap();
+        let min_arc_length = (self.x_dist * self.x_dist + self.y_dist * self.y_dist).sqrt();
+        if self.arc_len < min_arc_length {
+            self.arc_len = min_arc_length;
+        }
+        let res = Catenary::new(self.x_dist, self.y_dist, self.arc_len);
+        let Ok(cat) = res else {
+            eprintln!("failed!: {}", res.unwrap_err());
+            // egui_notify?
+            return;
+        };
 
         let texture_bytes = cat.render_new_tex();
         let (w, h) = cat.bounds;

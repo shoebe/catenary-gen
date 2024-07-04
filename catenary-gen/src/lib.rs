@@ -2,7 +2,7 @@ use rgb::AsPixels;
 
 const WHITE: rgb::RGBA8 = rgb::RGBA8::new(u8::MAX, u8::MAX, u8::MAX, u8::MAX);
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct CenteredCatenary {
     /// a is the minima of the curve, at (0, a)
     pub a: f64,
@@ -84,6 +84,7 @@ impl CenteredCatenary {
     }
 }
 
+#[derive(Debug)]
 pub struct Catenary {
     pub cat: CenteredCatenary,
     pub disp_x: f64,

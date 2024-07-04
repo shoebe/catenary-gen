@@ -121,8 +121,7 @@ impl eframe::App for TemplateApp {
 
             if ui.button("save").clicked() {
                 let [w, h] = self.texture.size();
-                catenary_gen::lodepng::encode32_file("image.png", &self.texture_bytes, w, h)
-                    .unwrap();
+                lodepng::encode32_file("image.png", &self.texture_bytes, w, h).unwrap();
             }
             egui::ScrollArea::both().show(ui, |ui| {
                 let im = egui::Image::new((

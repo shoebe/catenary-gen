@@ -316,7 +316,6 @@ dependencies = [
  "anyhow",
  "argmin",
  "bresenham-curves-circles-rs",
- "lodepng",
  "rgb",
  "tiny-skia",
 ]
@@ -329,6 +328,7 @@ dependencies = [
  "eframe",
  "egui",
  "env_logger",
+ "lodepng",
  "log",
  "wasm-bindgen-futures",
  "web-sys",

@@ -1,8 +1,6 @@
-pub use lodepng;
 use rgb::AsPixels;
 
-const WHITE: lodepng::RGBA = lodepng::RGBA::new(u8::MAX, u8::MAX, u8::MAX, u8::MAX);
-const BLANK: lodepng::RGBA = lodepng::RGBA::new(0, 0, 0, 0);
+const WHITE: rgb::RGBA8 = rgb::RGBA8::new(u8::MAX, u8::MAX, u8::MAX, u8::MAX);
 
 #[derive(Clone, Copy)]
 pub struct CenteredCatenary {
@@ -94,7 +92,7 @@ pub struct Catenary {
 }
 
 impl Catenary {
-    pub fn render_catenary_x(&self, buf: &mut [lodepng::RGBA], w: usize, h: usize) {
+    pub fn render_catenary_x(&self, buf: &mut [rgb::RGBA8], w: usize, h: usize) {
         for col in 0..w {
             let x = col as f64 + self.disp_x;
             let y = self.cat.evaluate_at_x(x);
@@ -112,7 +110,7 @@ impl Catenary {
         }
     }
 
-    pub fn render_catenary_y(&self, buf: &mut [lodepng::RGBA], w: usize, h: usize) {
+    pub fn render_catenary_y(&self, buf: &mut [rgb::RGBA8], w: usize, h: usize) {
         for row in 0..h {
             let y = (h - 1 - row) as f64 + self.disp_y;
             let x = self.cat.evaluate_at_y(y);
@@ -128,7 +126,7 @@ impl Catenary {
         }
     }
 
-    pub fn render_catenary(&self, buf: &mut [lodepng::RGBA], w: usize, h: usize) {
+    pub fn render_catenary(&self, buf: &mut [rgb::RGBA8], w: usize, h: usize) {
         self.render_catenary_x(buf, w, h);
         self.render_catenary_y(buf, w, h);
     }
@@ -188,7 +186,8 @@ impl Catenary {
 
 #[cfg(test)]
 mod test {
-    use crate::{Catenary, BLANK};
+    use crate::Catenary;
+    const BLANK: rgb::RGBA8 = rgb::RGBA8::new(0, 0, 0, 0);
 
     #[test]
     fn test() {

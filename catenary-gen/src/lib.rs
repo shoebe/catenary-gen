@@ -1,3 +1,4 @@
+pub use lodepng;
 use rgb::AsPixels;
 
 const WHITE: lodepng::RGBA = lodepng::RGBA::new(u8::MAX, u8::MAX, u8::MAX, u8::MAX);
@@ -62,22 +63,22 @@ impl CenteredCatenary {
         self.a * f64::acosh(y / self.a)
     }
 
-    pub fn find_point_pair(&self, dist_x: f64, dist_y: f64) -> anyhow::Result<f64> {
+    pub fn find_point_pair(&self, dist_h: f64, dist_v: f64) -> anyhow::Result<f64> {
         // maths derived from:
         //      y_dif = self.evaluate_at_x(x0 + dist_x) - self.evaluate_at_x(x0);
         // using cosh x - cosh y = 2 sinh[ (x+y)/2 ] sinh[ (x-y)/2 ]
 
-        let h_2 = dist_x / 2.0;
-        let v = dist_y;
+        let h_2 = dist_h / 2.0;
+        let v = dist_v;
 
         let sh = f64::sinh(h_2 / self.a);
         let r = v / (2.0 * self.a * sh);
         let x0 = f64::asinh(r) * self.a - h_2;
 
-        let y_dif = self.evaluate_at_x(x0 + dist_x) - self.evaluate_at_x(x0);
-        let dif = (y_dif - dist_y).abs();
+        let y_dif = self.evaluate_at_x(x0 + dist_h) - self.evaluate_at_x(x0);
+        let dif = (y_dif - dist_v).abs();
         if dif > 1e-5 {
-            dbg!(y_dif, dist_y);
+            dbg!(y_dif, dist_v);
             anyhow::bail!("dif too big: {}", dif);
         }
 

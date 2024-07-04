@@ -4,6 +4,7 @@ pub struct TemplateApp {
     x_dist: f64,
     y_dist: f64,
     arc_len: f64,
+    texture_bytes: Vec<u8>,
     texture: egui::TextureHandle,
     scale: usize,
 }
@@ -22,10 +23,10 @@ impl TemplateApp {
 
         let cat = Catenary::new(x_dist, y_dist, arc_len).unwrap();
 
-        let pixels = cat.render_new_tex();
+        let texture_bytes = cat.render_new_tex();
         let (w, h) = cat.bounds;
 
-        let im = egui::ColorImage::from_rgba_unmultiplied([w, h], &pixels);
+        let im = egui::ColorImage::from_rgba_unmultiplied([w, h], &texture_bytes);
 
         let texture = cc
             .egui_ctx
@@ -37,19 +38,21 @@ impl TemplateApp {
             arc_len,
             texture,
             scale: 3,
+            texture_bytes,
         }
     }
 
     pub fn update_texture(&mut self, egui_ctx: &egui::Context) {
         let cat = Catenary::new(self.x_dist, self.y_dist, self.arc_len).unwrap();
 
-        let pixels = cat.render_new_tex();
+        let texture_bytes = cat.render_new_tex();
         let (w, h) = cat.bounds;
 
-        let im = egui::ColorImage::from_rgba_unmultiplied([w, h], &pixels);
+        let im = egui::ColorImage::from_rgba_unmultiplied([w, h], &texture_bytes);
 
         let texture = egui_ctx.load_texture("texture", im, egui::TextureOptions::NEAREST);
         self.texture = texture;
+        self.texture_bytes = texture_bytes;
     }
 }
 
@@ -116,10 +119,19 @@ impl eframe::App for TemplateApp {
                     .integer(),
             );
 
-            let im = egui::Image::new((self.texture.id(), self.texture.size_vec2()))
-                .fit_to_original_size(self.scale as f32);
+            if ui.button("save").clicked() {
+                let [w, h] = self.texture.size();
+                catenary_gen::lodepng::encode32_file("image.png", &self.texture_bytes, w, h)
+                    .unwrap();
+            }
+            egui::ScrollArea::both().show(ui, |ui| {
+                let im = egui::Image::new((
+                    self.texture.id(),
+                    self.texture.size_vec2() * self.scale as f32,
+                ));
 
-            ui.add(im);
+                ui.add(im);
+            });
 
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
                 powered_by_egui_and_eframe(ui);

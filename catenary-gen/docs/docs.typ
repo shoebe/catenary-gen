@@ -58,19 +58,54 @@ $ L = a sinh(x_2/a) - a sinh(x_1/a) $ <arc-len>
 
 #pagebreak()
 
-== Catenary from point displacement and arc length
+== Algorithm for rendering catenaries in pixel art
+Pixel art catenaries can be drawn if the parameter $a$ is known. An x and y displacement is necessary render the wanted section.
 
-Goal: to draw a catenary with anchor points spaced apart by the vector "disp", with a length of rope between them $L$.
+First iterate through the x coordinates and use @cat to get the corresponding y coordinate, draw this pair. Once done, there will be gaps when the y displacement from one x-coord to the next is greater than 2.
 
-$ "disp" = vec(h, v) $ <disp>
+Fix this by iterating through the y coordinates, using @cat-inv to get and draw coord pairs. This will overwrite some of the pixels drawn during the first loop, but will get rid of the gaps.
+
+Pseudocode:
+```
+x_disp = ...
+y_disp = ...
+fn cat_y(x) = a * cosh(x/a)
+fn cat_x(y) = a * acosh(y/a)
+
+for x_im in 0..w
+  x = x_im + x_disp
+  y = cat_y(x)
+  y = y.round()
+  y_im = y - y_disp
+  # (0,0) is usually top-left for images
+  # flip and make (0,h-1) the top-left
+  y_im = h - 1 - y_im
+  draw(x_im,y_im)
+
+for y_im in 0..h
+  # (0,0) is usually top-left for images
+  # flip and make (0,h-1) the top-left
+  y_im = h - 1 - y_im
+  y = y_im + y_disp
+  x = cat_x(y)
+  x = x.round()
+  x_im = x - x_disp
+  draw(x,y)
+```
+
+== Catenary from anchor displacement and arc length
+
+Goal: to draw a catenary with anchor points spaced apart by the vector $"disp"_"AB"$, with a length of rope between them $L$.
+
+$ "disp"_"AB" = vec(h, v) $ <disp-AB>
 
 The catenary needs has anchor points:  $"Point"_A$ and $"Point"_B$, where
 
-$ "Point"_B = "Point"_A + "disp" $
+$ "Point"_B = "Point"_A + "disp"_"AB" $
 
 In summary: \
 #align(center, [
-Knowns: disp, $L$ \
+Knowns: $"disp"_"AB"$, $L$ \
 Unknowns: $a$, $"Point"_A$, $"Point"_B$ \
 ])
 
@@ -94,11 +129,11 @@ Unknowns: $a$, $"Point"_A$, $"Point"_B$ \
     draw.content("plot.pt1", anchor:"south", padding:.3, [$"Point"_A$])
     draw.content("plot.pt2", anchor:"south", padding:.3, [$"Point"_B$])
     draw.line("plot.pt1", "plot.pt2", mark: (end: ">"), name: "line")
-    draw.content(("line.start", 1.7, "line.end"), angle:"line.end", anchor:"south", padding:.1, [disp])
+    draw.content(("line.start", 1.7, "line.end"), angle:"line.end", anchor:"south", padding:.2, [$"disp"_"AB"$])
     draw.content(("plot.line1", 3, "plot.line2"), anchor:"south", padding:.3, [length of rope $L$])
   })
 }
-$a$ is the only paramter needed for the catenary equation in @cat. However, the section of the catenary which has the two points on the curve with a difference of "disp" must be found. 
+$a$ is the only paramter needed for the catenary equation in @cat. However, the section of the catenary which has the two points on the curve with a difference of $"disp"_"AB"$ must be found. 
 
 Since there is a direct relation between $x$ and $y$ from @cat and $"Point"_A$, $"Point"_B$ from disp, finding either $x_A$, $x_B$, $y_A$ or $y_B$ is sufficient.
 
@@ -153,7 +188,7 @@ cosh((2x_A + h)/(2a)) &= v/(2a sinh(h/(2a)))  \
 2x_A &= 2a "acosh"(v/(2a sinh(h/(2a)))) - h \
 $
 $ x_A = a "acosh"(v/(2a sinh(h/(2a)))) - h/2 \ $
-A similar equation can be derived from @L
+it can be similarly solved for in @L
 
 
 

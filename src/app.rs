@@ -98,7 +98,7 @@ impl eframe::App for TemplateApp {
 
             changed |= ui
                 .add(
-                    egui::Slider::new(&mut self.x_dist, 0.0..=2048.0)
+                    egui::Slider::new(&mut self.x_dist, 0.0..=500.0)
                         .text("x distance between points")
                         .clamp_to_range(false),
                 )
@@ -106,14 +106,14 @@ impl eframe::App for TemplateApp {
 
             changed |= ui
                 .add(
-                    egui::Slider::new(&mut self.y_dist, -2048.0..=2048.0)
+                    egui::Slider::new(&mut self.y_dist, -500.0..=500.0)
                         .text("y distance between points")
                         .clamp_to_range(false),
                 )
                 .changed();
 
             changed |= ui
-                .add(egui::Slider::new(&mut self.arc_len, 0.0..=5000.0).text("arc length"))
+                .add(egui::Slider::new(&mut self.arc_len, 0.0..=500.0).text("arc length"))
                 .changed();
 
             if changed {

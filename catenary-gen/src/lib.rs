@@ -35,11 +35,14 @@ impl CenteredCatenary {
         //dbg!(func_a(1.0), func_a(10.0), func_a(100.0));
         //dbg!(func_a_deriv(1.0), func_a_deriv(10.0), func_a_deriv(100.0));
 
-        let mut conv = roots::DebugConvergency::new(1e-10, 10000);
+        let mut conv = roots::SimpleConvergency {
+            eps: 1e-10,
+            max_iter: 1e4 as usize,
+        };
 
-        let a = roots::find_root_brent(5.0, 1e10, func_a, &mut conv)?;
+        let a = roots::find_root_brent(1e-10, 1e10, func_a, &mut conv)?;
 
-        dbg!(func_a(a));
+        assert!(func_a(a) < conv.eps);
 
         Ok(CenteredCatenary { a })
     }

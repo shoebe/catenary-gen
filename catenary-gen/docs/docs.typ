@@ -1,5 +1,9 @@
 #show box: it => align(center, it)
-#set math.equation(numbering: "(1)")
+#let numbered_eq(content) = math.equation(
+    block: true,
+    numbering: "(1)",
+    content,
+)
 
 = Rendering Catenaries
 \
@@ -12,7 +16,7 @@ If there is added weight, as in the rope is supporting extra weight other than i
 == Catenary equation
 
 The basic equation for catenaries is as follows:
-$ y = a cosh(x/a) $ <cat>
+#numbered_eq($ y = a cosh(x/a) $) <cat>
 Where $a > 0$.
 
 #{
@@ -49,12 +53,12 @@ Where $a > 0$.
 The catenary is centered on the $y$ axis, and is above the $x$ axis. The minima is at $(0, a)$. $a$ determines how "wide" the catenary is.
 
 The reverse is also possible, getting $x$ from $y$.
-$ x = a "acosh"(y/a) $ <cat-inv>
+#numbered_eq($ x = a "acosh"(y/a) $) <cat-inv>
 
 where acosh is the inverse of cosh, and only returns the positive values of x.
 
 The length of the curve between two points at $x_1$ and $x_2$ is:
-$ L = a sinh(x_2/a) - a sinh(x_1/a) $ <arc-len>
+#numbered_eq($ L = a sinh(x_2/a) - a sinh(x_1/a) $) <arc-len>
 
 #pagebreak()
 
@@ -97,7 +101,7 @@ for y_im in 0..h
 
 Goal: to draw a catenary with anchor points spaced apart by the vector $"disp"_"AB"$, with a length of rope between them $L$.
 
-$ "disp"_"AB" = vec(h, v) $ <disp-AB>
+$ "disp"_"AB" = vec(h, v) $
 
 The catenary needs has anchor points:  $"Point"_A$ and $"Point"_B$, where
 
@@ -137,34 +141,32 @@ $a$ is the only paramter needed for the catenary equation in @cat. However, the 
 
 Since there is a direct relation between $x$ and $y$ from @cat and $"Point"_A$, $"Point"_B$ from disp, finding either $x_A$, $x_B$, $y_A$ or $y_B$ is sufficient.
 
-Keeping in mind $x_B = x_A + h$ and $y_B = y_A + v$, and the hyperbolic identities:\ 
-$sinh(x) - sinh(y) = 2 cosh((x+y)/2) sinh((x-y)/2)$ \
-$cosh(x) - cosh(y) = 2 sinh((x+y)/2) sinh((x-y)/2)$
+Keeping in mind $x_B = x_A + h$ and $y_B = y_A + v$, and the hyperbolic identities:
+$ sinh(x) - sinh(y) = 2 cosh((x+y)/2) sinh((x-y)/2) $ 
+$ cosh(x) - cosh(y) = 2 sinh((x+y)/2) sinh((x-y)/2) $
 
 Both $"Point"_A$ and $"Point"_B$ are on the catenary, so an equation for $v$ by using @cat is:
 
 $ v &= a cosh(x_B/a) - a cosh(x_A/a) $
 This can be simplified to:
-$
-v/a &= cosh((x_A+h)/a) - cosh(x_A/a) \
-v/(2a) &= cosh((2x_A + h)/(2a)) sinh(h/(2a))
-$ <v>
+$ v/a &= cosh((x_A+h)/a) - cosh(x_A/a) $
+#numbered_eq($ v/(2a) &= cosh((2x_A + h)/(2a)) sinh(h/(2a)) $) <v>
 
-$ v^2 = 4 a^2 cosh^2((2x_A + h)/(2a)) sinh^2(h/(2a)) $ <v-squared>
+#numbered_eq($ v^2 = 4 a^2 cosh^2((2x_A + h)/(2a)) sinh^2(h/(2a)) $) <v-squared>
 
 The equation for $L$ in @arc-len can be similarly simplified:
 $ 
 L   &= a sinh(x_B/a) - a sinh(x_A/a) \
-L/a &= sinh((x_A+h)/a) - sinh(x_A/a) \
-L/(2a) &= sinh((2x_A + h)/(2a)) sinh(h/(2a)) \
-$ <L>
-$ L^2 = 4 a^2 sinh^2((2x_A + h)/(2a)) sinh^2(h/(2a)) $ <L-squared>
+L/a &= sinh((x_A+h)/a) - sinh(x_A/a)
+$
+#numbered_eq($ L/(2a) &= sinh((2x_A + h)/(2a)) sinh(h/(2a)) $) <L>
+#numbered_eq($ L^2 = 4 a^2 sinh^2((2x_A + h)/(2a)) sinh^2(h/(2a)) $) <L-squared>
 
 
 === Finding $a$
 
 Keeping in mind \
-$cosh^2(x) - sinh^2(x) = 1$ 
+$ cosh^2(x) - sinh^2(x) = 1 $ 
 
 Substracting @L-squared from @v-squared gives:
 
@@ -189,6 +191,7 @@ cosh((2x_A + h)/(2a)) &= v/(2a sinh(h/(2a)))  \
 $
 $ x_A = a "acosh"(v/(2a sinh(h/(2a)))) - h/2 \ $
 it can be similarly solved for in @L
+
 
 
 

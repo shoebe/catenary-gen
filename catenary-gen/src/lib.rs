@@ -11,42 +11,35 @@ pub struct CenteredCatenary {
 impl CenteredCatenary {
     /// arc length will be set to the minimum if it is too short
     pub fn new_from_params(dist_h: f64, dist_v: f64, mut arc_length: f64) -> anyhow::Result<Self> {
-        struct SimpleFunc<F: Fn(f64) -> f64> {
-            f: F,
-        }
-
-        impl<F: Fn(f64) -> f64> argmin::core::CostFunction for SimpleFunc<F> {
-            type Param = f64;
-            type Output = f64;
-
-            fn cost(&self, param: &Self::Param) -> Result<Self::Output, anyhow::Error> {
-                Ok((self.f)(*param))
-            }
-        }
-
         let min_arc = (dist_h * dist_h + dist_v * dist_v).sqrt();
         if arc_length < min_arc {
+            // min might need to be more than this
             arc_length = min_arc + 1e-5
         }
 
-        let func_a = SimpleFunc {
-            f: |a: f64| {
-                // from https://en.wikipedia.org/wiki/Catenary#Determining_parameters
-                let l_eq = f64::sqrt(arc_length * arc_length - dist_v * dist_v);
-                let r_eq = (2.0 * a) * f64::sinh(dist_h / (2.0 * a));
-                l_eq - r_eq
-            },
+        // https://math.stackexchange.com/a/1002996
+
+        let func_a = |a: f64| {
+            let b = a / dist_h;
+            let left = (2.0 * b * f64::sinh(0.5 / b) - 1.0).powf(-0.5);
+            let right =
+                ((arc_length * arc_length - dist_v * dist_v).sqrt() / dist_h - 1.0).powf(-0.5);
+            left - right
         };
 
-        //dbg!(func_a(5.0), func_a(10.0), func_a(20.0), func_a(50.0));
+        let func_a_deriv = |a: f64| {
+            let frac = dist_h / 2.0 / a;
+            dist_h * frac.cosh() / a - 2.0 * frac.sinh()
+        };
 
-        let solver = argmin::solver::brent::BrentRoot::new(0.0, 1e10, 1e-15);
+        //dbg!(func_a(1.0), func_a(10.0), func_a(100.0));
+        //dbg!(func_a_deriv(1.0), func_a_deriv(10.0), func_a_deriv(100.0));
 
-        let res = argmin::core::Executor::new(func_a, solver)
-            .configure(|state| state.max_iters(1000).param(20.0))
-            .run()?;
+        let mut conv = roots::DebugConvergency::new(1e-10, 10000);
 
-        let a = res.state().best_param.unwrap();
+        let a = roots::find_root_brent(5.0, 1e10, func_a, &mut conv)?;
+
+        dbg!(func_a(a));
 
         Ok(CenteredCatenary { a })
     }
@@ -79,6 +72,9 @@ impl CenteredCatenary {
             dbg!(y_dif, dist_v);
             anyhow::bail!("dif too big: {}", dif);
         }
+
+        let l = self.a * f64::sinh((x0 + dist_h) / self.a) - self.a * f64::sinh((x0) / self.a);
+        dbg!(l);
 
         Ok(x0)
     }

@@ -22,48 +22,35 @@ impl CenteredCatenary {
         let v = dist_v;
         let L = arc_length;
 
+        // Inaccurate for small a, will return very big numbers or Inf
         let func_a = |a: f64| {
             let a2 = a * 2.0;
             a2 * sinh(h / a2) - sqrt(L * L - v * v)
         };
 
+        // This is inaccurate for small a, could return 0, Inf, Nan, -Inf
         let func_a_deriv = |a: f64| {
             let a2 = a * 2.0;
             let left = 2.0 * sinh(h / a2);
             let right = h / a * cosh(h / a2);
-            // avoid inf - inf = nan
-            if left == f64::INFINITY && right == f64::INFINITY {
-                // lim a->0, cosh(1/a) == sinh(1/a)
-                if 2.0 > h / a {
-                    f64::INFINITY
-                } else {
-                    f64::NEG_INFINITY
-                }
-            } else {
-                left - right
-            }
+            left - right
         };
-
-        //dbg!(func_a(1.0), func_a(10.0), func_a(100.0));
-        //dbg!(func_a_deriv(1.0), func_a_deriv(10.0), func_a_deriv(100.0));
 
         let mut conv = roots::SimpleConvergency {
             eps: 1e-10,
             max_iter: 1e4 as usize,
         };
 
-        //let a = roots::find_root_brent(1e-10, 1e10, func_a, &mut conv)?;
         let res = roots::find_root_newton_raphson(20.0, func_a, func_a_deriv, &mut conv);
         let a = match res {
             Ok(a) => a.abs(),
-            Err(e) => {
-                dbg!(e);
-                // Maybe derivative was zero? try brent
+            Err(_e) => {
+                //dbg!(e);
+                // derivate for small a is inacurrate since it substracts huge numbers
+                // try brent?
                 roots::find_root_brent(1.0, 20.0, func_a, &mut conv)?
             }
         };
-
-        assert!(func_a(a) <= conv.eps);
 
         Ok(CenteredCatenary { a })
     }

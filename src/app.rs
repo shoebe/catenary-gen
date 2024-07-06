@@ -109,8 +109,13 @@ impl eframe::App for TemplateApp {
                 .changed();
 
             changed |= ui
-                .add(egui::Slider::new(&mut self.slack, 0.0..=500.0).text("slack"))
+                .add(
+                    egui::Slider::new(&mut self.slack, 0.0..=500.0)
+                        .text("slack")
+                        .clamp_to_range(false),
+                )
                 .changed();
+            self.slack = self.slack.max(0.0);
 
             if changed {
                 self.update_texture(ctx);

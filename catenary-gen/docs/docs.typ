@@ -265,3 +265,5 @@ $ x_A "new" = x_A + 20 $
 $ y_A "new" = a cosh((x_A "new") / a) $
 
 Could also move it up or down instead
+
+Doing this is not very intuitive with the parameters though.

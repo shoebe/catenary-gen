@@ -10,26 +10,38 @@ pub struct CenteredCatenary {
 
 impl CenteredCatenary {
     /// arc length will be set to the minimum if it is too short
-    pub fn new_from_params(dist_h: f64, dist_v: f64, mut arc_length: f64) -> anyhow::Result<Self> {
+    pub fn new_from_params(dist_h: f64, dist_v: f64, slack: f64) -> anyhow::Result<Self> {
         let min_arc = (dist_h * dist_h + dist_v * dist_v).sqrt();
-        if arc_length < min_arc {
-            // min might need to be more than this
-            arc_length = min_arc + 1e-5
-        }
+        let arc_length = min_arc + slack.max(1e-3);
 
-        // https://math.stackexchange.com/a/1002996
+        let sqrt = f64::sqrt;
+        let sinh = f64::sinh;
+        let cosh = f64::cosh;
+
+        let h = dist_h;
+        let v = dist_v;
+        let L = arc_length;
 
         let func_a = |a: f64| {
-            let b = a / dist_h;
-            let left = (2.0 * b * f64::sinh(0.5 / b) - 1.0).powf(-0.5);
-            let right =
-                ((arc_length * arc_length - dist_v * dist_v).sqrt() / dist_h - 1.0).powf(-0.5);
-            left - right
+            let a2 = a * 2.0;
+            a2 * sinh(h / a2) - sqrt(L * L - v * v)
         };
 
         let func_a_deriv = |a: f64| {
-            let frac = dist_h / 2.0 / a;
-            dist_h * frac.cosh() / a - 2.0 * frac.sinh()
+            let a2 = a * 2.0;
+            let left = 2.0 * sinh(h / a2);
+            let right = h / a * cosh(h / a2);
+            // avoid inf - inf = nan
+            if left == f64::INFINITY && right == f64::INFINITY {
+                // lim a->0, cosh(1/a) == sinh(1/a)
+                if 2.0 > h / a {
+                    f64::INFINITY
+                } else {
+                    f64::NEG_INFINITY
+                }
+            } else {
+                left - right
+            }
         };
 
         //dbg!(func_a(1.0), func_a(10.0), func_a(100.0));
@@ -40,9 +52,18 @@ impl CenteredCatenary {
             max_iter: 1e4 as usize,
         };
 
-        let a = roots::find_root_brent(1e-10, 1e10, func_a, &mut conv)?;
+        //let a = roots::find_root_brent(1e-10, 1e10, func_a, &mut conv)?;
+        let res = roots::find_root_newton_raphson(20.0, func_a, func_a_deriv, &mut conv);
+        let a = match res {
+            Ok(a) => a.abs(),
+            Err(e) => {
+                dbg!(e);
+                // Maybe derivative was zero? try brent
+                roots::find_root_brent(1.0, 20.0, func_a, &mut conv)?
+            }
+        };
 
-        assert!(func_a(a) < conv.eps);
+        assert!(func_a(a) <= conv.eps);
 
         Ok(CenteredCatenary { a })
     }

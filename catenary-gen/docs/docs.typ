@@ -160,14 +160,16 @@ Both $"Point"_A$ and $"Point"_B$ are on the catenary, so an equation for $v$ by 
 $ v &= a cosh(x_B/a) - a cosh(x_A/a) $
 This can be worked to:
 $ v/a &= cosh((x_A+h)/a) - cosh(x_A/a) $
-#numbered_eq($ v/(2a) &= cosh((2x_A + h)/(2a)) sinh(h/(2a)) $) <v>
+#numbered_eq($ v/(2a) = sinh((2x_A + h)/(2a)) sinh(h/(2a)) $) <v>
 
-#numbered_eq($ v^2 = 4 a^2 cosh^2((2x_A + h)/(2a)) sinh^2(h/(2a)) $) <v-squared>
+#numbered_eq($ v^2 = 4 a^2 sinh^2((2x_A + h)/(2a)) sinh^2(h/(2a)) $) <v-squared>
 
 The equation for $L$ in @arc-len can be similarly worked:
 $ L/a &= sinh((x_A+h)/a) - sinh(x_A/a) $
-#numbered_eq($ L/(2a) &= sinh((2x_A + h)/(2a)) sinh(h/(2a)) $) <L>
-#numbered_eq($ L^2 = 4 a^2 sinh^2((2x_A + h)/(2a)) sinh^2(h/(2a)) $) <L-squared>
+#numbered_eq($ L/(2a) &= cosh((2x_A + h)/(2a)) sinh(h/(2a)) $) <L>
+#numbered_eq($ L^2 = 4 a^2 cosh^2((2x_A + h)/(2a)) sinh^2(h/(2a)) $) <L-squared>
+
+$sinh^2$ is an even function, so this function is also valid
 
 
 == Finding $a$
@@ -175,17 +177,21 @@ $ L/a &= sinh((x_A+h)/a) - sinh(x_A/a) $
 Keeping in mind \
 $ cosh^2(x) - sinh^2(x) = 1 $ 
 
-Substracting @L-squared from @v-squared gives:
+Substracting @v-squared from @L-squared gives:
 
 $ 
-v^2 - L^2 &=   4 a^2 cosh^2((2x_A + h)/(2a)) sinh^2(h/(2a)) - 4 a^2 sinh^2((2x_A + h)/(2a)) sinh^2(h/(2a)) \
+L^2 - v^2 &=   4 a^2 cosh^2((2x_A + h)/(2a)) sinh^2(h/(2a)) - 4 a^2 sinh^2((2x_A + h)/(2a)) sinh^2(h/(2a)) \
 &=  4 a^2 sinh^2(h/(2a)) [cosh^2((2x_A + h)/(2a)) - sinh^2((2x_A + h)/(2a))] \
 &= 4 a^2 sinh^2(h/(2a))
 $
 #pagebreak()
-Therefore:
-$ sqrt(v^2 - L^2) = 2 a sinh(h/(2a)) $
+Therefore for $a >= 0$:
+$ sqrt(L^2 - v^2) = 2 a sinh(h/(2a)) $
 Solving for $a$ must be done numerically.
+
+$ f(a) = 0 = 2 a sinh(h/(2a)) - sqrt(L^2 - v^2) $
+
+$ (d f(a))/(d a) = 2 sinh(h/(2a)) - h/a cosh(h/(2a)) $
 
 == Finding $x_A$ <find-xa>
 $x_A$ can be solved for in @v:

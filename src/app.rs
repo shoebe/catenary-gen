@@ -3,7 +3,7 @@ use catenary_gen::Catenary;
 pub struct TemplateApp {
     x_dist: f64,
     y_dist: f64,
-    arc_len: f64,
+    slack: f64,
     texture_bytes: Vec<u8>,
     texture: egui::TextureHandle,
     scale: usize,
@@ -35,7 +35,7 @@ impl TemplateApp {
         Self {
             x_dist,
             y_dist,
-            arc_len,
+            slack: arc_len,
             texture,
             scale: 3,
             texture_bytes,
@@ -43,11 +43,7 @@ impl TemplateApp {
     }
 
     pub fn update_texture(&mut self, egui_ctx: &egui::Context) {
-        let min_arc_length = (self.x_dist * self.x_dist + self.y_dist * self.y_dist).sqrt();
-        if self.arc_len < min_arc_length {
-            self.arc_len = min_arc_length;
-        }
-        let res = Catenary::new(self.x_dist, self.y_dist, self.arc_len);
+        let res = Catenary::new(self.x_dist, self.y_dist, self.slack);
         let Ok(cat) = res else {
             eprintln!("failed!: {}", res.unwrap_err());
             // egui_notify?
@@ -113,7 +109,7 @@ impl eframe::App for TemplateApp {
                 .changed();
 
             changed |= ui
-                .add(egui::Slider::new(&mut self.arc_len, 0.0..=500.0).text("arc length"))
+                .add(egui::Slider::new(&mut self.slack, 0.0..=500.0).text("slack"))
                 .changed();
 
             if changed {

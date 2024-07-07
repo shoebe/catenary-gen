@@ -4,6 +4,7 @@ pub struct TemplateApp {
     x_dist: f64,
     y_dist: f64,
     slack: f64,
+    flipped: bool,
     texture_bytes: Vec<u8>,
     texture: egui::TextureHandle,
     scale: usize,
@@ -23,7 +24,7 @@ impl TemplateApp {
 
         let cat = Catenary::new(x_dist, y_dist, arc_len).unwrap();
 
-        let texture_bytes = cat.render_new_tex();
+        let texture_bytes = cat.render_new_tex(false);
         let (w, h) = cat.bounds;
 
         let im = egui::ColorImage::from_rgba_unmultiplied([w, h], &texture_bytes);
@@ -39,6 +40,7 @@ impl TemplateApp {
             texture,
             scale: 3,
             texture_bytes,
+            flipped: false,
         }
     }
 
@@ -50,7 +52,7 @@ impl TemplateApp {
             return;
         };
 
-        let texture_bytes = cat.render_new_tex();
+        let texture_bytes = cat.render_new_tex(self.flipped);
         let (w, h) = cat.bounds;
 
         let im = egui::ColorImage::from_rgba_unmultiplied([w, h], &texture_bytes);
@@ -99,14 +101,16 @@ impl eframe::App for TemplateApp {
                         .clamp_to_range(false),
                 )
                 .changed();
+            self.x_dist = self.x_dist.max(0.0);
 
             changed |= ui
                 .add(
-                    egui::Slider::new(&mut self.y_dist, -500.0..=500.0)
+                    egui::Slider::new(&mut self.y_dist, 0.0..=500.0)
                         .text("y distance between points")
                         .clamp_to_range(false),
                 )
                 .changed();
+            self.y_dist = self.y_dist.max(0.0);
 
             changed |= ui
                 .add(
@@ -116,6 +120,8 @@ impl eframe::App for TemplateApp {
                 )
                 .changed();
             self.slack = self.slack.max(0.0);
+
+            changed |= ui.checkbox(&mut self.flipped, "flipped x").changed();
 
             if changed {
                 self.update_texture(ctx);

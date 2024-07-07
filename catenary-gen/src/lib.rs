@@ -22,6 +22,9 @@ impl CenteredCatenary {
         let v = dist_v;
         let L = arc_length;
 
+        // TODO: could use https://crates.io/crates/astro-float for better precision
+        // would need to implement roots::FloatType on it
+
         // Inaccurate for small a, will return very big numbers or Inf
         let func_a = |a: f64| {
             let a2 = a * 2.0;
@@ -100,7 +103,8 @@ pub struct Catenary {
 }
 
 impl Catenary {
-    pub fn render_catenary_x(&self, buf: &mut [rgb::RGBA8], w: usize, h: usize) {
+    pub fn render_catenary_x(&self, buf: &mut [rgb::RGBA8]) {
+        let (w, h) = self.bounds;
         for col in 0..w {
             let x = col as f64 + self.disp_x;
             let y = self.cat.evaluate_at_x(x);
@@ -118,14 +122,17 @@ impl Catenary {
         }
     }
 
-    pub fn render_catenary_y(&self, buf: &mut [rgb::RGBA8], w: usize, h: usize) {
+    pub fn render_catenary_y(&self, buf: &mut [rgb::RGBA8]) {
+        let max_y_at_0 = self.cat.evaluate_at_x(0 as f64 + self.disp_x);
+
+        let (w, h) = self.bounds;
         for row in 0..h {
             let y = (h - 1 - row) as f64 + self.disp_y;
             let x = self.cat.evaluate_at_y(y);
             let col1 = x - self.disp_x;
             let col2 = -x - self.disp_x;
             for col in [col1.round(), col2.round()] {
-                if col >= 0.0 && (col as usize) < w {
+                if col > 0.0 && (col as usize) < w || col == 0.0 && y <= max_y_at_0 {
                     let col = col as usize;
                     let i = row * w + col;
                     buf[i] = WHITE;
@@ -134,9 +141,9 @@ impl Catenary {
         }
     }
 
-    pub fn render_catenary(&self, buf: &mut [rgb::RGBA8], w: usize, h: usize) {
-        self.render_catenary_x(buf, w, h);
-        self.render_catenary_y(buf, w, h);
+    pub fn render_catenary(&self, buf: &mut [rgb::RGBA8]) {
+        self.render_catenary_x(buf);
+        self.render_catenary_y(buf);
     }
 
     /// arc length will be set to the minimum if it is too short
@@ -171,9 +178,9 @@ impl Catenary {
         // caused by the minima. it is only non-zero if the minima is visible
         let extra_v = point_y_min - disp_y;
 
-        let w = dist_h;
-        let h = f64::abs(dist_v) + extra_v;
-        let bounds = (w.ceil() as usize, h.ceil() as usize);
+        let w = dist_h + 1.0;
+        let h = f64::abs(dist_v) + extra_v + 1.0;
+        let bounds = (w as usize, h as usize);
 
         Ok(Self {
             cat,
@@ -183,11 +190,21 @@ impl Catenary {
         })
     }
 
-    pub fn render_new_tex(&self) -> Vec<u8> {
+    pub fn render_new_tex(&self, flipped_x: bool) -> Vec<u8> {
         let (w, h) = self.bounds;
         let mut buf = vec![0_u8; w * h * 4];
         let pixels: &mut [rgb::RGBA8] = buf.as_mut_slice().as_pixels_mut();
-        self.render_catenary(pixels, w, h);
+        self.render_catenary(pixels);
+        if flipped_x {
+            for x in 0..(w / 2) {
+                let o_x = w - 1 - x;
+                for y in 0..h {
+                    let i = y * w + x;
+                    let o_i = y * w + o_x;
+                    pixels.swap(i, o_i);
+                }
+            }
+        }
         buf
     }
 }
@@ -206,15 +223,15 @@ mod test {
         let (w, h) = cat.bounds;
 
         let mut buf = vec![BLANK; w * h];
-        cat.render_catenary(&mut buf, w, h);
+        cat.render_catenary(&mut buf);
         lodepng::encode32_file("generated_images/cat.png", &buf, w, h).unwrap();
 
         let mut buf = vec![BLANK; w * h];
-        cat.render_catenary_x(&mut buf, w, h);
+        cat.render_catenary_x(&mut buf);
         lodepng::encode32_file("generated_images/cat_x.png", &buf, w, h).unwrap();
 
         let mut buf = vec![BLANK; w * h];
-        cat.render_catenary_y(&mut buf, w, h);
+        cat.render_catenary_y(&mut buf);
         lodepng::encode32_file("generated_images/cat_y.png", &buf, w, h).unwrap();
     }
 }

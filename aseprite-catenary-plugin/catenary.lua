@@ -1,4 +1,6 @@
--- See PDF for derivations and Rust code for more comments
+-- See PDF for derivations at https://github.com/shoebe/catenary-gen/blob/main/docs/docs.pdf
+-- and Rust code at https://github.com/shoebe/catenary-gen/blob/main/catenary-gen-rs/src/lib.rs
+-- for more comments
 
 local hyperbolic = require "hyperbolic"
 local roots = require "roots"

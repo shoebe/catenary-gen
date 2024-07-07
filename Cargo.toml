@@ -1,0 +1,6 @@
+[workspace]
+members = ["catenary-gen-rs", "catenary-gen-rs-ui"]
+resolver = "2"
+
+[workspace.dependencies]
+catenary-gen = { path = "catenary-gen-rs" }

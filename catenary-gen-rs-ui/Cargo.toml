@@ -22,7 +22,7 @@ eframe = { version = "0.28", default-features = false, features = [
 
 log = "0.4"
 
-catenary-gen = { path = "../catenary-gen" }
+catenary-gen = { workspace = true }
 
 lodepng = { version = "3.10", default-features = false, features = [
     "rust_backend",
@@ -39,10 +39,3 @@ wasm-bindgen-futures = "0.4"
 # to access the DOM (to hide the loading text)
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
 version = "0.3.4"
-
-[profile.release]
-opt-level = 2 # fast and small wasm
-
-# Optimize all dependencies even in debug builds:
-[profile.dev.package."*"]
-opt-level = 2

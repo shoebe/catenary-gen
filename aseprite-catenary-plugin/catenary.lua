@@ -33,9 +33,12 @@ function M.new_from_params(h, v, slack)
     end
 
     local a = roots.find_root_newton_raphson(20, f, d)
-
     if a == nil then
-        a = roots.find_root_brent(1, 20, f)
+        a = roots.find_root_bisecting(1e-5, 20, f)
+    end
+
+    if a ~= nil then
+        a = math.abs(a)
     end
 
     return a

@@ -1,0 +1,21 @@
+{
+    "name": "catenary-gen",
+    "displayName": "Catenary gen",
+    "description": "Generate catenaries",
+    "version": "0.1",
+    "author": {
+        "name": "Sebastien Marleau",
+        "email": "smarleau.2015@gmail.com"
+    },
+    "license": "CC-BY-4.0",
+    "categories": [
+        "Scripts"
+    ],
+    "contributes": {
+        "scripts": [
+            {
+                "path": "./main.lua"
+            }
+        ]
+    }
+}

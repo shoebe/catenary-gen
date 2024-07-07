@@ -147,8 +147,8 @@ impl Catenary {
     }
 
     /// arc length will be set to the minimum if it is too short
-    pub fn new(dist_h: f64, dist_v: f64, arc_length: f64) -> anyhow::Result<Self> {
-        let cat = CenteredCatenary::new_from_params(dist_h, dist_v, arc_length)?;
+    pub fn new(dist_h: f64, dist_v: f64, slack: f64) -> anyhow::Result<Self> {
+        let cat = CenteredCatenary::new_from_params(dist_h, dist_v, slack)?;
         // a is the minima of the curve, at (0, a)
         dbg!(cat.a);
 

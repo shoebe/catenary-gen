@@ -13,42 +13,45 @@ function dump(o)
     end
 end
 
-local function render_cat(sel, slack)
-    local max_x = sel.x
-    local max_y = sel.y
-    local points = {}
-    local success = cat.render_cat_from_params(sel.w, sel.h, slack, false, function(x, y)
-        table.insert(points, Point { sel.x + x, sel.y + y })
-        if sel.x > max_x then
-            max_x = sel.x
-        end
-        if sel.y > max_y then
-            max_y = sel.y
-        end
-    end)
-    if not success then
-        return false
-    end
-    --[[ if app.sprite ~= nil then
-        app.sprite.selection:select(Rectangle {
-            sel.x, sel.y, max_x - sel.x, max_y - sel.y
-        })
-    end ]]
+local function render_cat(sel, slack, flip_x)
+    local success = false
+
     app.transaction(
         "render catenary",
         function()
-            for k, v in pairs(points) do
+            app.command.DeselectMask()
+            local max = sel.origin
+
+
+            success = cat.render_cat_from_params(sel.w, sel.h, slack, false, function(x, y)
+                if flip_x then
+                    x = sel.w - 1 - x
+                end
+                local point = Point { sel.x + x, sel.y + y }
+                if point.x > max.x then
+                    max.x = point.x
+                end
+                if point.y > max.y then
+                    max.y = point.y
+                end
                 app.useTool {
                     tool = "pencil",
                     color = app.fgColor,
-                    points = { v },
+                    points = { point },
+                }
+            end)
+            if success then
+                app.useTool {
+                    tool = "rectangular_marquee",
+                    points = { sel.origin, max }
                 }
             end
         end
     )
-
-    app.refresh()
-    return true
+    if success then
+        app.refresh()
+    end
+    return success
 end
 
 local function open_dialog()
@@ -63,8 +66,6 @@ local function open_dialog()
     end
 
     local sel = app.sprite.selection.bounds
-    app.sprite.selection:deselect()
-
     if sel.w == 0 or sel.h == 0 then
         app.alert("Use selection tool first")
         return
@@ -73,18 +74,29 @@ local function open_dialog()
     local last_success = render_cat(sel, 0)
 
     local dlg = Dialog("Catenary")
+
+    function on_change()
+        if last_success ~= nil then
+            app.undo()
+        end
+        last_success = render_cat(sel, dlg.data.slack_num, dlg.data.flip_x)
+    end
+
     dlg:number {
         id = "slack_num",
         label = "slack",
         decimals = 0,
-        onchange = function()
-            if last_success then
-                app.undo()
-            end
-            last_success = render_cat(sel, dlg.data.slack_num)
-        end
+        onchange = on_change
     }
-    dlg:show()
+    dlg:check {
+        id = "flip_x",
+        label = "flip x",
+        selected = false,
+        onclick = on_change
+    }
+    dlg:show {
+        wait = true
+    }
 end
 
 function init(plugin)

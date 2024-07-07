@@ -178,8 +178,9 @@ impl Catenary {
         // caused by the minima. it is only non-zero if the minima is visible
         let extra_v = point_y_min - disp_y;
 
-        let w = dist_h + 1.0;
-        let h = f64::abs(dist_v) + extra_v + 1.0;
+        // not sure why this +2.0 is needed but it gets rid of pixels not appearing
+        let w = dist_h + 2.0;
+        let h = f64::abs(dist_v) + extra_v.round();
         let bounds = (w as usize, h as usize);
 
         Ok(Self {
@@ -216,9 +217,9 @@ mod test {
 
     #[test]
     fn test() {
-        let dist_v = 1000.0;
-        let dist_h = 1500.0;
-        let arc_len = 2500.0;
+        let dist_v = 100.0;
+        let dist_h = 100.0;
+        let arc_len = 250.0;
         let cat = Catenary::new(dist_h, dist_v, arc_len).unwrap();
         let (w, h) = cat.bounds;
 
